@@ -1,0 +1,26 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+
+    "version": "0.2.0",
+    "configurations": [
+    {
+        "name": "Python: Current File (Dev Container)",
+        "type": "debugpy",
+        "request": "launch",
+        "program": "${file}",
+        "console": "integratedTerminal",
+        "cwd": "${workspaceFolder}",
+        "args": [
+          "--input", "${workspaceFolder}/input_images/",
+          "--output", "${workspaceFolder}/output_images/",
+          "--rect", "10", "10", "100", "100",
+          "--blur_kernel", "15"
+      ]
+        // "env": {
+        //     "PYTHONPATH": "/home/devuser/.local/lib/python3.10/site-packages"
+      // }
+    }
+  ]
+}

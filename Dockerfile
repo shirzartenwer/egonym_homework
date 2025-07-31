@@ -13,10 +13,9 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Python environment
-# TODO: Install Python dependencies efficiently
 COPY requirements.txt .
 RUN pip install --upgrade pip && \
-    pip install --requirement requirements.txt
+    pip install --no-cache-dir --requirement requirements.txt
 
 # Optional: Add a non-root user for dev containers
 RUN useradd -ms /bin/bash devuser
