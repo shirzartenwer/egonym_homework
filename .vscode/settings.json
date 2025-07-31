@@ -1,3 +1,11 @@
 {
-    "remote.autoForwardPortsFallback": 0
+    "remote.autoForwardPortsFallback": 0,
+    // switch language server to Jedi
+    "python.languageServer": "Jedi",
+    // run on save
+    "editor.codeActionsOnSave": {
+        "source.fixAll.ruff": "explicit"
+    },
+    // disable redundant Pylance diagnostics if you like
+    "python.analysis.typeCheckingMode": "off"
 }

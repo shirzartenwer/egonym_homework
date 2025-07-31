@@ -8,16 +8,15 @@
       "settings": {
             "python.defaultInterpreterPath": "/usr/local/bin/python3",
             "python.analysis.extraPaths": ["/usr/local/lib/python3.10/site-packages"]
-      }
       },
       "extensions": [
         "ms-python.python",
         "ms-vscode.cpptools",
         "ms-azuretools.vscode-docker",
-        "ms-python.debugpy"
+        "ms-python.debugpy",
+        "astral-sh.ruff" 
       ]
-    }
+      }
+      
   }
 }
-
-    

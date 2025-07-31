@@ -82,7 +82,22 @@ if __name__ == "__main__":
     parser.add_argument("--output", required=True, help="Output images folder")
     parser.add_argument("--rect", nargs=4, type=int, metavar=('X', 'Y', 'W', 'H'), required=True, help="Rectangle (x y w h) for ROI")
     parser.add_argument("--blur_kernel", type=int, default=15, help="Blur kernel size (odd integer)")
-    args = parser.parse_args()
+    # args = parser.parse_args()
+
+    # Check if running in development/testing mode
+    import sys
+    if len(sys.argv) == 1:  # No arguments provided
+        # Default arguments for testing
+        test_args = [
+            "--input", "./input_images_test/",
+            "--output", "./output_images_test/", 
+            "--rect", "10", "10", "100", "100",
+            "--blur_kernel", "15"
+        ]
+        args = parser.parse_args(test_args)
+        print("Using default test arguments:", test_args)
+    else:
+        args = parser.parse_args()
 
     try:
         run_pipeline(args.input, args.output, tuple(args.rect), args.blur_kernel)
