@@ -13,8 +13,8 @@
         "console": "integratedTerminal",
         "cwd": "${workspaceFolder}",
         "args": [
-          "--input", "${workspaceFolder}/input_images/",
-          "--output", "${workspaceFolder}/output_images/",
+          "--input", "${workspaceFolder}/input_images_test/",
+          "--output", "${workspaceFolder}/output_images_test/",
           "--rect", "10", "10", "100", "100",
           "--blur_kernel", "15"
       ]
