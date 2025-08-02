@@ -3,7 +3,7 @@ import os
 import cv2
 from typing import Tuple
 from pydantic import BaseModel, field_validator, model_validator
-import cpp_module  # Assuming cpp_module is the C++ binding for the function
+import cpp_module_edge_detector as cpp_module  # Assuming cpp_module is the C++ binding for the function
 
     
 class PipelineParams(BaseModel):
@@ -64,14 +64,18 @@ def run_pipeline(input_folder: str, output_folder: str, rect_tuple: Tuple[int, i
             print(f"Failed to read image '{image_file}'. Skipping.")
             continue
             
-        img_width = img.shape[1]
         try:
             # Call the C++ function to blur the largest shape in the specified rectangle
-            result_img = cpp_module.blur_largest_shape_in_rect(img, params.rect_tuple, params.blur_kernel, img_width)
+            result_img, gray_img = cpp_module.blur_largest_shape_in_rect(img, params.rect_tuple, params.blur_kernel)
             # Write result to output_folder
             output_path = os.path.join(params.output_folder, image_file)
+            gray_output_path = os.path.join(
+                params.output_folder,
+                os.path.splitext(image_file)[0] + "_gray" + os.path.splitext(image_file)[1]
+            )
+            cv2.imwrite(gray_output_path, gray_img)
             cv2.imwrite(output_path, result_img)
-            print(f"Processed and saved: {output_path}")
+            print(f"Processed and saved: {output_path} and {gray_output_path}")
         except Exception as e:
             print(f"Error processing '{image_file}': {e}")
 
