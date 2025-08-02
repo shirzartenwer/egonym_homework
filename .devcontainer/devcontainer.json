@@ -14,7 +14,7 @@
         "ms-vscode.cpptools",
         "ms-azuretools.vscode-docker",
         "ms-python.debugpy",
-        "astral-sh.ruff" 
+        "charliermarsh.ruff"
       ]
       }
       
