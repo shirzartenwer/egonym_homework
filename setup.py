@@ -9,10 +9,11 @@ ext_modules = [
         include_dirs=[
             pybind11.get_include(),
             numpy.get_include(),
-        ],
+            "/usr/include/opencv4"],
         language="c++",
-        extra_compile_args=["-O3", "-std=c++11"],
+        extra_compile_args=["-O0", "-g", "-std=c++11"],
         libraries=["opencv_core", "opencv_imgproc"],
+        undef_macros=["NDEBUG"],
     ),
 ]
 
