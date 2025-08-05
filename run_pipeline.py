@@ -110,7 +110,7 @@ if __name__ == "__main__":
     if len(sys.argv) == 1:  # No arguments provided
         # Default arguments for testing
         test_args = [
-            "--input", "./input_images_test/",
+            "--input", "./input_images_test/2/",
             "--output", "./output_images_test/", 
             "--rect", "10", "10", "100", "100",
             "--blur_kernel", "15"

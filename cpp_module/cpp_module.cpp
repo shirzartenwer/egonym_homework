@@ -50,14 +50,27 @@ py::tuple blur_largest_shape_in_rect(
 
     // 2. Find the largest shape in the ROI using contours
     std::vector<std::vector<cv::Point>> contours;
-    cv::Mat gray, blurred;
+    cv::Mat gray, blurred, edges;
     cv::cvtColor(roi_image, gray, cv::COLOR_BGR2GRAY);
     // save the gray image for debugging in the output directory
     std::cout << "Gray image created: " << gray.rows << "x" << gray.cols << std::endl;
     // Apply Gaussian blur and Canny edge detection
-    cv::GaussianBlur(gray, blurred, cv::Size(5, 5), 0);
-    cv::Canny(blurred, blurred, 50, 150);
-    cv::findContours(blurred, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+    cv::GaussianBlur(gray, blurred, cv::Size(9, 9), 0);
+    cv::Canny(blurred, edges, 10, 50);
+    cv::morphologyEx(edges, edges, cv::MORPH_CLOSE, cv::Mat(), cv::Point(-1, -1), 3);
+
+
+    // cv::Mat kernel = cv::getStructuringElement(
+    //     cv::MORPH_CROSS,
+    //     cv::Size(2, 2)
+    // );
+    // cv::morphologyEx(edges, edges, cv::MORPH_ERODE, kernel,
+    //              cv::Point(-1,-1), 1);
+
+    // cv::Mat dilated;
+    // // Dilate the edges to close gaps
+    // cv::dilate(edges, dilated, cv::Mat(), cv::Point(-1, -1), 1);  // adjust iteration if needed
+    cv::findContours(edges, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
     cv::Mat mask;
 
@@ -72,8 +85,10 @@ py::tuple blur_largest_shape_in_rect(
 
         mask = cv::Mat::zeros(roi_image.size(), CV_8UC1);
         cv::drawContours(mask, std::vector<std::vector<cv::Point>>{largest_contour}, -1, cv::Scalar(255), -1);
-        cv::GaussianBlur(roi_image, roi_image, cv::Size(blur_kernel, blur_kernel), 0);
-        roi_image.copyTo(input_image(roi), mask);
+
+        cv::Mat blurred;
+        cv::GaussianBlur(roi_image, blurred, cv::Size(blur_kernel, blur_kernel), 0);
+        blurred.copyTo(input_image(roi), mask);
 
         // // Draw the contour on a copy of the ROI for visualization
         // roi_with_contour = roi_image.clone();
@@ -90,10 +105,10 @@ py::tuple blur_largest_shape_in_rect(
 
 
     // 4 Return the edges detected by Canny for testing
-    py::array_t<uint8_t> blurred_array(
-        {blurred.rows, blurred.cols, blurred.channels()},
-        {static_cast<size_t>(blurred.step[0]), static_cast<size_t>(blurred.step[1]), static_cast<size_t>(blurred.elemSize())},
-        blurred.data
+    py::array_t<uint8_t> edges_array(
+        {edges.rows, edges.cols, edges.channels()},
+        {static_cast<size_t>(edges.step[0]), static_cast<size_t>(edges.step[1]), static_cast<size_t>(edges.elemSize())},
+        edges.data
     );
 
     // 5. Return gray image for testing
@@ -110,7 +125,7 @@ py::tuple blur_largest_shape_in_rect(
         mask.data
     );
 
-    return py::make_tuple(input_array, gray_array, blurred_array, roi_image_array, mask_array);
+    return py::make_tuple(input_array, gray_array, edges_array, roi_image_array, mask_array);
 }
 
 // Module registration – candidate does not need to change this
