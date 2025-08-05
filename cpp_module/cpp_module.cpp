@@ -16,8 +16,12 @@ py::tuple blur_largest_shape_in_rect(
     // Construct the image using the input_array and buffer info
     py::buffer_info buf_info = input_array.request();
     if (buf_info.ndim != 3 || buf_info.shape[2] != 3) {
+        // handle the case for gray images, where input shape is (height, width)
         throw std::runtime_error("Input array must be a 3D array with 3 channels (RGB).");
     }
+
+    // std::cout << "buffer info: " << buf_info.shape << std::endl;
+    std::cout << "buffer info: " << buf_info.format << std::endl;
     
     size_t height = buf_info.shape[0];
     size_t width = buf_info.shape[1];   
@@ -39,6 +43,8 @@ py::tuple blur_largest_shape_in_rect(
         rect_tuple[2].cast<int>(),
         rect_tuple[3].cast<int>()
     );
+
+    // TODO: take the reference of the input image, instead of copying
     cv::Mat roi_image = input_image(roi);
     std::cout << "ROI extracted: " << roi_image.rows << "x" << roi_image.cols << std::endl; 
 
@@ -53,25 +59,58 @@ py::tuple blur_largest_shape_in_rect(
     cv::Canny(blurred, blurred, 50, 150);
     cv::findContours(blurred, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
-    
+    cv::Mat mask;
+
     // 3. Apply Gaussian blur to the largest shape with the specified blur_kernel
     if (!contours.empty()) {
         auto largest_contour = *std::max_element(contours.begin(), contours.end(),
             [](const std::vector<cv::Point>& a, const std::vector<cv::Point>& b) {
                 return cv::contourArea(a) < cv::contourArea(b);
             });
-        cv::Mat mask = cv::Mat::zeros(roi_image.size(), CV_8UC1);
+        
+        std::cout << "Largest contour found with area: " << cv::contourArea(largest_contour) << std::endl;
+
+        mask = cv::Mat::zeros(roi_image.size(), CV_8UC1);
         cv::drawContours(mask, std::vector<std::vector<cv::Point>>{largest_contour}, -1, cv::Scalar(255), -1);
         cv::GaussianBlur(roi_image, roi_image, cv::Size(blur_kernel, blur_kernel), 0);
         roi_image.copyTo(input_image(roi), mask);
+
+        // // Draw the contour on a copy of the ROI for visualization
+        // roi_with_contour = roi_image.clone();
+        // cv::drawContours(roi_with_contour, std::vector<std::vector<cv::Point>>{largest_contour}, -1, cv::Scalar(0, 255, 0), 2);
+
+        
     }
-    // 4. Return processed image
+    // 4 Return the ROI image was countour on it for testing
+    py::array_t<uint8_t> roi_image_array(
+        {roi_image.rows, roi_image.cols, roi_image.channels()},
+        {static_cast<size_t>(roi_image.step[0]), static_cast<size_t>(roi_image.step[1]), static_cast<size_t>(roi_image.elemSize())},
+        roi_image.data
+    );
+
+
+    // 4 Return the edges detected by Canny for testing
+    py::array_t<uint8_t> blurred_array(
+        {blurred.rows, blurred.cols, blurred.channels()},
+        {static_cast<size_t>(blurred.step[0]), static_cast<size_t>(blurred.step[1]), static_cast<size_t>(blurred.elemSize())},
+        blurred.data
+    );
+
+    // 5. Return gray image for testing
     py::array_t<uint8_t> gray_array(
         {gray.rows, gray.cols},
         {static_cast<size_t>(gray.step), static_cast<size_t>(gray.elemSize())},
         gray.data
     );
-    return py::make_tuple(input_array, gray_array);
+
+    // Return the mask for testing
+    py::array_t<uint8_t> mask_array(
+        {mask.rows, mask.cols},
+        {static_cast<size_t>(mask.step), static_cast<size_t>(mask.elemSize())},
+        mask.data
+    );
+
+    return py::make_tuple(input_array, gray_array, blurred_array, roi_image_array, mask_array);
 }
 
 // Module registration – candidate does not need to change this

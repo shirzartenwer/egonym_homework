@@ -66,16 +66,33 @@ def run_pipeline(input_folder: str, output_folder: str, rect_tuple: Tuple[int, i
             
         try:
             # Call the C++ function to blur the largest shape in the specified rectangle
-            result_img, gray_img = cpp_module.blur_largest_shape_in_rect(img, params.rect_tuple, params.blur_kernel)
+            result_img, gray_img, edges_image, roi_image, mask_imge = cpp_module.blur_largest_shape_in_rect(img, params.rect_tuple, params.blur_kernel)
             # Write result to output_folder
             output_path = os.path.join(params.output_folder, image_file)
             gray_output_path = os.path.join(
                 params.output_folder,
                 os.path.splitext(image_file)[0] + "_gray" + os.path.splitext(image_file)[1]
             )
-            cv2.imwrite(gray_output_path, gray_img)
+            edges_image_output_path= os.path.join(
+                params.output_folder,
+                os.path.splitext(image_file)[0] + "_edges" + os.path.splitext(image_file)[1]
+            )
+            mask_imge_output_path = os.path.join(
+                params.output_folder,
+                os.path.splitext(image_file)[0] + "_mask" + os.path.splitext(image_file)[1]
+            )
+            roi_output_path = os.path.join(
+                params.output_folder,
+                os.path.splitext(image_file)[0] + "_roi" + os.path.splitext(image_file)[1]
+            )
+
             cv2.imwrite(output_path, result_img)
-            print(f"Processed and saved: {output_path} and {gray_output_path}")
+            cv2.imwrite(gray_output_path, gray_img)
+            cv2.imwrite(edges_image_output_path, edges_image)
+            cv2.imwrite(roi_output_path, roi_image)
+            cv2.imwrite(mask_imge_output_path, mask_imge)
+
+            print(f"Processed and saved: {output_path} and {gray_output_path} and {edges_image_output_path} and {roi_output_path} and {mask_imge_output_path}")
         except Exception as e:
             print(f"Error processing '{image_file}': {e}")
 
