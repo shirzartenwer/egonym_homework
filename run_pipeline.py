@@ -66,33 +66,13 @@ def run_pipeline(input_folder: str, output_folder: str, rect_tuple: Tuple[int, i
             
         try:
             # Call the C++ function to blur the largest shape in the specified rectangle
-            result_img, gray_img, edges_image, roi_image, mask_imge = cpp_module.blur_largest_shape_in_rect(img, params.rect_tuple, params.blur_kernel)
+            result_img  = cpp_module.blur_largest_shape_in_rect(img, params.rect_tuple, params.blur_kernel)
             # Write result to output_folder
             output_path = os.path.join(params.output_folder, image_file)
-            gray_output_path = os.path.join(
-                params.output_folder,
-                os.path.splitext(image_file)[0] + "_gray" + os.path.splitext(image_file)[1]
-            )
-            edges_image_output_path= os.path.join(
-                params.output_folder,
-                os.path.splitext(image_file)[0] + "_edges" + os.path.splitext(image_file)[1]
-            )
-            mask_imge_output_path = os.path.join(
-                params.output_folder,
-                os.path.splitext(image_file)[0] + "_mask" + os.path.splitext(image_file)[1]
-            )
-            roi_output_path = os.path.join(
-                params.output_folder,
-                os.path.splitext(image_file)[0] + "_roi" + os.path.splitext(image_file)[1]
-            )
 
             cv2.imwrite(output_path, result_img)
-            cv2.imwrite(gray_output_path, gray_img)
-            cv2.imwrite(edges_image_output_path, edges_image)
-            cv2.imwrite(roi_output_path, roi_image)
-            cv2.imwrite(mask_imge_output_path, mask_imge)
 
-            print(f"Processed and saved: {output_path} and {gray_output_path} and {edges_image_output_path} and {roi_output_path} and {mask_imge_output_path}")
+            print(f"Processed and saved: {output_path} with rectangle {params.rect_tuple} and blur kernel {params.blur_kernel}")
         except Exception as e:
             print(f"Error processing '{image_file}': {e}")
 
@@ -103,22 +83,8 @@ if __name__ == "__main__":
     parser.add_argument("--output", required=True, help="Output images folder")
     parser.add_argument("--rect", nargs=4, type=int, metavar=('X', 'Y', 'W', 'H'), required=True, help="Rectangle (x y w h) for ROI")
     parser.add_argument("--blur_kernel", type=int, default=15, help="Blur kernel size (odd integer)")
-    # args = parser.parse_args()
+    args = parser.parse_args()
 
-    # Check if running in development/testing mode
-    import sys
-    if len(sys.argv) == 1:  # No arguments provided
-        # Default arguments for testing
-        test_args = [
-            "--input", "./input_images_test/2/",
-            "--output", "./output_images_test/", 
-            "--rect", "10", "10", "100", "100",
-            "--blur_kernel", "15"
-        ]
-        args = parser.parse_args(test_args)
-        print("Using default test arguments:", test_args)
-    else:
-        args = parser.parse_args()
 
     try:
         run_pipeline(args.input, args.output, tuple(args.rect), args.blur_kernel)
