@@ -3,8 +3,7 @@ import os
 import cv2
 from typing import Tuple
 from pydantic import BaseModel, field_validator, model_validator
-import cpp_module_edge_detector as cpp_module  # Assuming cpp_module is the C++ binding for the function
-
+import cpp_module_edge_detector as cpp_module  
     
 class PipelineParams(BaseModel):
     input_folder: str
@@ -66,33 +65,31 @@ def run_pipeline(input_folder: str, output_folder: str, rect_tuple: Tuple[int, i
             
         try:
             # Call the C++ function to blur the largest shape in the specified rectangle
-            result_img, gray_img, edges_image, roi_image, mask_imge = cpp_module.blur_largest_shape_in_rect(img, params.rect_tuple, params.blur_kernel)
-            # Write result to output_folder
-            output_path = os.path.join(params.output_folder, image_file)
-            gray_output_path = os.path.join(
-                params.output_folder,
-                os.path.splitext(image_file)[0] + "_gray" + os.path.splitext(image_file)[1]
-            )
-            edges_image_output_path= os.path.join(
-                params.output_folder,
-                os.path.splitext(image_file)[0] + "_edges" + os.path.splitext(image_file)[1]
-            )
-            mask_imge_output_path = os.path.join(
-                params.output_folder,
-                os.path.splitext(image_file)[0] + "_mask" + os.path.splitext(image_file)[1]
-            )
-            roi_output_path = os.path.join(
-                params.output_folder,
-                os.path.splitext(image_file)[0] + "_roi" + os.path.splitext(image_file)[1]
-            )
+            result = cpp_module.blur_largest_shape_in_rect(img, params.rect_tuple, params.blur_kernel)
+            if isinstance(result, tuple):
+                # Debug mode: unpack the result
+                result_img, gray_img, edges_image, roi_image, mask_image = result
+                # Write result to output_folder
+                output_path = os.path.join(params.output_folder, image_file)
+                base_name = os.path.splitext(image_file)[0]
+                ext = os.path.splitext(image_file)[1]
+                
+                gray_output_path = os.path.join(params.output_folder, f"{base_name}_gray{ext}")
+                edges_output_path = os.path.join(params.output_folder, f"{base_name}_edges{ext}")
+                roi_output_path = os.path.join(params.output_folder, f"{base_name}_roi{ext}")
+                mask_output_path = os.path.join(params.output_folder, f"{base_name}_mask{ext}")
 
-            cv2.imwrite(output_path, result_img)
-            cv2.imwrite(gray_output_path, gray_img)
-            cv2.imwrite(edges_image_output_path, edges_image)
-            cv2.imwrite(roi_output_path, roi_image)
-            cv2.imwrite(mask_imge_output_path, mask_imge)
-
-            print(f"Processed and saved: {output_path} and {gray_output_path} and {edges_image_output_path} and {roi_output_path} and {mask_imge_output_path}")
+                cv2.imwrite(output_path, result_img)
+                cv2.imwrite(gray_output_path, gray_img)
+                cv2.imwrite(edges_output_path, edges_image)
+                cv2.imwrite(roi_output_path, roi_image)
+                cv2.imwrite(mask_output_path, mask_image)
+                print(f"🔧 DEBUG: Processed {image_file} -> saved result + 4 debug images")
+            else:
+                result_img = result
+                output_path = os.path.join(params.output_folder, image_file)
+                cv2.imwrite(output_path, result_img)
+                print(f"✅ Processed {image_file} -> saved result")
         except Exception as e:
             print(f"Error processing '{image_file}': {e}")
 
@@ -103,7 +100,7 @@ if __name__ == "__main__":
     parser.add_argument("--output", required=True, help="Output images folder")
     parser.add_argument("--rect", nargs=4, type=int, metavar=('X', 'Y', 'W', 'H'), required=True, help="Rectangle (x y w h) for ROI")
     parser.add_argument("--blur_kernel", type=int, default=15, help="Blur kernel size (odd integer)")
-    # args = parser.parse_args()
+
 
     # Check if running in development/testing mode
     import sys
