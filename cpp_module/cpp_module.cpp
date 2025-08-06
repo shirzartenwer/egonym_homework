@@ -50,7 +50,7 @@ py::tuple blur_largest_shape_in_rect(
 
     // 2. Find the largest shape in the ROI using contours
     std::vector<std::vector<cv::Point>> contours;
-    cv::Mat gray, blurred, edges;
+    cv::Mat gray, blurred, edges, mask;
     cv::cvtColor(roi_image, gray, cv::COLOR_BGR2GRAY);
     // save the gray image for debugging in the output directory
     std::cout << "Gray image created: " << gray.rows << "x" << gray.cols << std::endl;
@@ -71,8 +71,6 @@ py::tuple blur_largest_shape_in_rect(
     // // Dilate the edges to close gaps
     // cv::dilate(edges, dilated, cv::Mat(), cv::Point(-1, -1), 1);  // adjust iteration if needed
     cv::findContours(edges, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-
-    cv::Mat mask;
 
     // 3. Apply Gaussian blur to the largest shape with the specified blur_kernel
     if (!contours.empty()) {
