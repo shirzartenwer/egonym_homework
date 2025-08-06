@@ -56,7 +56,7 @@ py::tuple blur_largest_shape_in_rect(
     std::cout << "Gray image created: " << gray.rows << "x" << gray.cols << std::endl;
     // Apply Gaussian blur and Canny edge detection
     cv::GaussianBlur(gray, blurred, cv::Size(5, 5), 0);
-    cv::Canny(blurred, edges, 10, 50);
+    cv::Canny(blurred, edges, 180, 500);
     cv::morphologyEx(edges, edges, cv::MORPH_CLOSE, cv::Mat(), cv::Point(-1, -1), 3);
 
 
