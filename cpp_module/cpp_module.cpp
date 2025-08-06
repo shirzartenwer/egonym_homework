@@ -58,18 +58,6 @@ py::tuple blur_largest_shape_in_rect(
     cv::GaussianBlur(gray, blurred, cv::Size(5, 5), 0);
     cv::Canny(blurred, edges, 180, 500);
     cv::morphologyEx(edges, edges, cv::MORPH_CLOSE, cv::Mat(), cv::Point(-1, -1), 3);
-
-
-    // cv::Mat kernel = cv::getStructuringElement(
-    //     cv::MORPH_CROSS,
-    //     cv::Size(2, 2)
-    // );
-    // cv::morphologyEx(edges, edges, cv::MORPH_ERODE, kernel,
-    //              cv::Point(-1,-1), 1);
-
-    // cv::Mat dilated;
-    // // Dilate the edges to close gaps
-    // cv::dilate(edges, dilated, cv::Mat(), cv::Point(-1, -1), 1);  // adjust iteration if needed
     cv::findContours(edges, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
     // 3. Apply Gaussian blur to the largest shape with the specified blur_kernel
