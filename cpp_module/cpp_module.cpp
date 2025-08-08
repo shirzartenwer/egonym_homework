@@ -11,7 +11,11 @@ py::object process_image_internal(
     int blur_kernel = 15)         // Only default parameter
 {
 #ifdef DEBUG
-    std::cout << "=== DEBUG: Function called ===" << std::endl;
+    // Performance profiling setup
+    cv::TickMeter total_timer, edge_timer, blur_timer;
+    total_timer.start();
+    
+    std::cout << "=== DEBUG: Function called (ORIGINAL CODE) ===" << std::endl;
     std::cout << "blur_kernel: " << blur_kernel << std::endl;
 #endif
 
@@ -50,15 +54,21 @@ py::object process_image_internal(
     // Convert the ROI to grayscale for better edge detection
     std::vector<std::vector<cv::Point>> contours;
     cv::Mat gray, blurred, edges, mask;
-    cv::cvtColor(roi_image, gray, cv::COLOR_BGR2GRAY);
+    
 #ifdef DEBUG
-    std::cout << "Gray image created: " << gray.rows << "x" << gray.cols << std::endl;
+    edge_timer.start();
 #endif
+    cv::cvtColor(roi_image, gray, cv::COLOR_BGR2GRAY);
     // Apply Gaussian blur and Canny edge detection
     cv::GaussianBlur(gray, blurred, cv::Size(5, 5), 0);
     cv::Canny(blurred, edges, 180, 500);
     cv::morphologyEx(edges, edges, cv::MORPH_CLOSE, cv::Mat(), cv::Point(-1, -1), 3);
     cv::findContours(edges, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+#ifdef DEBUG
+    edge_timer.stop();
+    std::cout << "Gray image created: " << gray.rows << "x" << gray.cols << std::endl;
+    std::cout << "Edge detection time: " << edge_timer.getTimeMilli() << " ms" << std::endl;
+#endif
 
     // Apply Gaussian blur to the largest shape with the specified blur_kernel
     if (!contours.empty()) {
@@ -68,6 +78,7 @@ py::object process_image_internal(
             });
 #ifdef DEBUG
         std::cout << "Largest contour found with area: " << cv::contourArea(largest_contour) << std::endl;
+        blur_timer.start();
 #endif
         mask = cv::Mat::zeros(roi_image.size(), CV_8UC1);
         cv::drawContours(mask, std::vector<std::vector<cv::Point>>{largest_contour}, -1, cv::Scalar(255), -1);
@@ -75,6 +86,10 @@ py::object process_image_internal(
         cv::Mat blurred;
         cv::GaussianBlur(roi_image, blurred, cv::Size(blur_kernel, blur_kernel), 0);
         blurred.copyTo(input_image(roi), mask);
+#ifdef DEBUG
+        blur_timer.stop();
+        std::cout << "Blur processing time: " << blur_timer.getTimeMilli() << " ms" << std::endl;
+#endif
         
     }
 #ifdef DEBUG
@@ -104,6 +119,13 @@ py::object process_image_internal(
         mask.data
     );
 
+    total_timer.stop();
+    std::cout << "=== ORIGINAL CODE PERFORMANCE ===" << std::endl;
+    std::cout << "Total processing time: " << total_timer.getTimeMilli() << " ms" << std::endl;
+    std::cout << "- Edge detection: " << edge_timer.getTimeMilli() << " ms" << std::endl;
+    std::cout << "- Blur processing: " << blur_timer.getTimeMilli() << " ms" << std::endl;
+    std::cout << "=============================" << std::endl;
+    
     return py::make_tuple(input_array, gray_array, edges_array, roi_image_array, mask_array);
 #else
     return input_array;
