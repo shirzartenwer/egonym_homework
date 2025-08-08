@@ -14,6 +14,11 @@
 
 5. Implemented another solution just using Claude Code CLI and compared the results against it for improvement
 6. Performance improvement
+    1. Ask Claude to identify the potential performance issues.
+    2. Ask Claude to implement runtime profilling under debug flag in the C++ and Python file. 
+    3. Looked up a performance optimization [tutorial](https://www.opencvhelp.org/tutorials/best-practices/performance-optimization/) for openCV.
+    4. Ask Claude to integrate the advice from the OpenCV and implement the performance optimization it proposed and generate a report. 
+    5. The report says the optimization using `cv::UMat`didn't improve much, due to maybe data copying between CPU and GPU.
 
 
 
