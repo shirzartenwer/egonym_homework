@@ -1,112 +1,101 @@
-### Documentation on how I solved this task
+# Documentation
 
+First of all, I want to thank you for the opportunity to solve this take-home task. The whole process of understanding the problem domain, implementing the solution, fine-tuning the parameters, and finally trying to optimize it was really fun! I finished most of the work already on Thursday this week, but the nice weekend delayed my report submission. Sorry for that.
 
-First of all, I want to thank you for the opporunity for me to solve this take home tasks. The whole process of understanding the problem domains, implementing the solution, fine tuning the parameters and finally triyng to do some optimization on it, was really fun! 
-
-Next, in the follwing text I segmented few steps I've taken to understand the problem and implementing the solution: 
-
+Next, in the following text, I segmented the steps I’ve taken to understand the problem and implement the solution:
 
 ## Setups
 
-1. The main branch contains the final solution, without debugging flags for development prupose.
-2. The dev branch contains the debugging。
-
+1. The main branch contains the final solution, images used for the reporting, and final code.
+2. The dev branch contains the debug flag. It builds by default with the debug flag.
+3. The dev_c2_optl branch contains the optimization work done with Claude. It was done in a separate repo but pushed here for completeness and transparency.
 
 ## Steps
 
-1. Problem understanding: learning from function Signature and ChatGPT
-    This step involved understanding the abstract problem of : Given a rectangle area on a picture, detect the biggest shape and bluring it. I used ChatGPT to understand the common approach of solving it.  After a few iterations with ChatGPT, the solution workflow visualiszed as a diagram by ChatGPT looked like [this](image.png)
+1. **Problem understanding**: Learning from function signatures and ChatGPT  
 
-    From this diagram, I understood a few key concetps: converting to gray scale, converting to black and white using thresholding, and a need for a mask. 
+    This step involved understanding the abstract problem: *Given a rectangular area in a picture, detect the biggest shape and blur it*. I used ChatGPT to understand the common approach to solving it. After a few iterations with ChatGPT, the solution workflow visualized as a diagram by ChatGPT looked like [this](image.png).  
 
-    Also in this step, when it comes to the code, I started by looking at the function signature to understand what data structure is needed. 
+    From this diagram, I understood a few key concepts: converting to grayscale, converting to black and white using thresholding, and the need for a mask.  
+
+    Also in this step, when it came to the code, I started by looking at the function signature to understand what data structure was needed:  
     ```c++
     py::array_t<uint8_t> blur_largest_shape_in_rect(
-    py::array_t<uint8_t> input_array,
-    py::tuple rect_tuple,
-    int blur_kernel = 15)
+        py::array_t<uint8_t> input_array,
+        py::tuple rect_tuple,
+        int blur_kernel = 15)
     ```
-    Looking at `py::array_t<uint8_t>` as a function return, and `py::array_t<uint8_t> input_array input_array`, I thought this is a two dimensional array by default. And maybe this function takes gray scaled images. I sent an email in a rush to ask Vojta if this functino only takes gray images. But very soon I realised it actually can take n-d array and the dimension of the array is stored in `buffer_info`.
+    Looking at `py::array_t<uint8_t>` as a function return, and `py::array_t<uint8_t> input_array`, I initially thought this was a two-dimensional array by default, and maybe this function only took grayscale images. I even sent an email in a rush to ask Vojta if this function only takes gray images. But very soon I realized it can actually take an n-dimensional array, and the dimensions are stored in `buffer_info`.
 
-    After these two steps, and looking at the generic code given by ChatGPT, it seemed this is not a very complicated problems to solve. I am ready to iteratively implement it with the help of Github Copilot in VScode. 
+    After these two steps, and looking at the generic code given by ChatGPT, it seemed this was not a very complicated problem to solve. I was ready to iteratively implement it with the help of GitHub Copilot in VS Code.  
 
-    Though at this point, I also realsied there is not sample input data given or performance requierments given. 
+    At this point, I also realized there were no sample input data or performance requirements given.
 
-2. DevOps and Linter Setup
-    Before implementing anything, I needed the setup to work in the container. To ensure a smoother dev experiences and some good practices. Things I did there are:
-    - Setting up devcontainer based on Dockerfile, which includes configuring the right paths for packages 
-    - Setup linter behavior in `.vscode/settings.json`.
+2. **DevOps and Linter Setup**  
+    Before implementing anything, I needed the setup to work in the container to ensure a smoother development experience and good practices:  
+    - Set up a devcontainer based on Dockerfile, including configuring the correct paths for packages.  
+    - Set up linter behavior in `.vscode/settings.json`.
 
+3. **Iterated implementation with Copilot**  
+    Next, I iteratively implemented the solution in `run_pipeline.py` and `cpp_module/cpp_module`. In Python, since there were requirements for input parameters and many conditional checks were needed for input sanity, I introduced `Pydantic` to handle input validation clearly.  
 
-3. Iterated impelmentation with Copilot
-    Next, I iteratively started to implement the solution first in `run_pipeline.py`and `cpp_module/cpp_module`. While in Python, understanding there are some requirements for input parameters, and many conditional check is needed for input sanity, I introduced `Pydantic` to the code space to take care of input sanity check in a clear way. 
+    After the Python implementation, I added a few commented lines in the C++ file based on the flowchart generated by ChatGPT earlier, and implemented it using Copilot.  
 
-    After Python implementation is done, I introduced few commented lines in the C++ file, based on the flow chart generated by ChatGPT in the previous step, and implemented it using CoPilot. 
+    The whole implementation was rather fast. I had v0 of the code.
 
-    The whole implementation was rather fast. I had the v0 of the code.
+4. **Understanding the code and cross-checking correctness**  
+    To understand the code given by Copilot (which already looked very similar to ChatGPT’s), I researched OpenCV packages to understand the general approach to `edge detection`. [This article](https://opencv.org/blog/edge-detection-using-opencv/) helped the most.  
 
-4. Understand the code and cross checking if it's correct
-    To understood the code given by CoPilot, given it already looked very similar to code given by ChatGPT, I did some research in OpenCV packages to understand the general approach of `edge detection.` [This article](https://opencv.org/blog/edge-detection-using-opencv/) helped the most.
+    This step also increased my understanding of a few concepts (see the Appendix below).  
 
-    Also this step increaed my understanding of the few concetps (see bottom of this page).
+    It became clear that inspecting intermediate results was needed to judge how well the pipeline was performing, by checking the following images:  
+    - ROI: to check if the right area is selected.  
+    - Gray: the grayscale image.  
+    - Edges: to see what contours are detected.  
+    - Mask: the final shape to be blurred.
 
-    What became clear as well is the need to inspect intermediate reesults to judge how well the pipelien is peforming, by checking the following images:
-    - ROI, tune if the right area is selected
-    - Gray, the gray image
-    - Edges, see what contours are detected
-    - Mask, finally the shape that will be blurred. 
+4. **Pulling sample data, testing pipeline, and parameter tuning**  
+    At this point, I needed to pull some sample data for testing the pipeline. Given Egonym works with facial data, I pulled a portrait from the internet — the “smiling lady” image. This portrait later helped with parameter tuning.  
 
+    Inspecting the result for the first [sample data](./input_images_test/1/smiling_lady.jpg), I saw it blurred too much area. The issue was an ill-generated mask. **It turns out tuning the mask was not as easy as it appears** — the detected edges through Canny directly influence how the mask will look. Clearer pictures make edge detection easier. For the sample data, the edges looked like [this](./report/smiling_lady_edges.jpg) and the mask had only one contour [(seen here)](./report/smiling_lady_mask.jpg).  
 
-4. Pulling sample data, testing pipeline and parameter tunning
-    
-    At this point, it became clear that I need to pull some sample data myself for testing the pipeline. Given Egonym works with facial data, I then naively pulled a good looking portriat from internet, the smiling lady image. But also thanks to this portriat, later helped me digged into the parameter tuning. 
+    When I switched to a [standard LinkedIn portrait](./input_images_test/2/better_protrait_rect160_1_200_240.jpg), the edge picture was [this one](./output_images_test/report/better_protrait_rect160_1_200_240_edges.jpg) and the mask was [much better](./output_images_test/report/better_protrait_rect160_1_200_240_mask.jpg) — just missing one closing line.  
 
-    I inspected the program run result for the 
-    
-    <img src='./input_images_test/1/smiling_lady.jpg', alt="Smiling Lady", width="10"/>
+    I then tuned:  
+    - The hysteresis thresholds of the Canny function.  
+    - The blur kernel in the first Gaussian Blur function.  
 
-    it blurred to match area. After digging it deeper, the problem was the ill-generated mask. Turns out tuning the mask was not as easy as it apepars. The detected edges through Canny directly influence how the Mask will look like. Getting a clearer picture as training data makes the edge detectoin easier. Considering this, I changed my training data from [A smiling laday with scarf](./input_images_test/1/smiling_lady.jpg) to a [standard linkedin protrait picture](./input_images_test/2/better_protrait_rect160_1_200_240.jpg). The edges and masks for the lady was returned as [this](./report/smiling_lady_edges.jpg) and the mask was only one contour [(seen here)](./report/smiling_lady_mask.jpg). 
+    This improved results: [more detailed edges](./report/tunning/better_protrait_rect160_1_200_240_edges.jpg) and [a closed mask](./report/tunning/better_protrait_rect160_1_200_240_mask.jpg).  
 
-    In contrast, for the same parameter, without changing anything, the [edge picture for the standard linkedin protrait was ](./output_images_test/report/better_protrait_rect160_1_200_240_edges.jpg) and [the mask was ](./output_images_test/report/better_protrait_rect160_1_200_240_mask.jpg). At least, this time the mask was a contour that just missed one closing line.
+    ChatGPT suggested applying dilation or erosion. After trial and error, the best mask came from using:  
+    ```c++
+    cv::morphologyEx(edges, edges, cv::MORPH_CLOSE, ...);
+    ```
+    This connected contours and produced [good edges](./output_images_test/better_protrait_edges.jpg), [a mask matching the head](./output_images_test/better_protrait_mask.jpg), and [a good blur](./output_images_test/better_protrait_rect160_1_200_240.jpg).  
 
-    After settling with the second picture, I tuned the following parameter:
-    - The hysteries threshould of the Canny function.
-    - The blur kernnel in the first Gaussina Blur function.
+    I repeated tuning on other images, learning parameter effects — e.g., for the [5th picture](./input_images_test/5/mens_gromming_rect100_1_400_300.jpg), where face–clothing contrast is high, using very high thresholds gave the best result [as seen here](./output_images_test/mens_gromming_mask.jpg).  
 
-    Tunining them lead to a little bit better results: [a more detailed edges](./report/tunning/better_protrait_rect160_1_200_240_edges.jpg) and at least [a closing mask](./report/tunning/better_protrait_rect160_1_200_240_mask.jpg).
+    After this step, the pipeline compiled and built successfully.
 
-    From here, I then asked AI on how to improve it better. Go suggestions to apply dilataion, or erosion. In the end, after some trial and error, I got the best mask result so far using ```cv::morphologyEx(edges, edges, cv::MORPH_CLOSE...);``` to connect contours and. The end result I got was then [a good edge](./output_images_test/better_protrait_edges.jpg), [a mask with the shape of the head](./output_images_test/better_protrait_mask.jpg), which lead to a [good blur](./output_images_test/better_protrait_rect160_1_200_240.jpg).
+5. **Implementing another solution using Claude Code CLI**  
+    For comparison, I created another repo where Claude CLI implemented the whole solution from scratch. The code was not meaningfully different from mine, so I did not include it here.
 
+6. **Performance improvement**  
+    Though not required, I did three iterations with Claude Code CLI for fun in a separate repo:  
+    - Ask Claude to identify performance issues.  
+    - Add runtime profiling under a debug flag in both C++ and Python.  
+    - Consult a performance optimization [tutorial](https://www.opencvhelp.org/tutorials/best-practices/performance-optimization/) for OpenCV.  
+    - Integrate advice from the tutorial.  
 
-    After I got this result with this protrait, I went on and tunned the parameters a little bit and blured other 3 pictures. During this process, I gained more intuitive understanding of different parameters. For example, for the [5 th picture](./input_images_test/5/mens_gromming_rect100_1_400_300.jpg) where the the contrast between the face and cloth color is huge, having a very big paramter for the lower and upperbound of hysteresis threshold gives the best result [as its seen here](./output_images_test/mens_gromming_mask.jpg). Also in this case, controlloing the lower threshold to 180 would be sufficient and upper threshold can be any number bigger than 180.
+    Using `cv::UMat` initially showed little benefit — likely due to CPU–GPU data copying and because I hadn’t installed Nvidia drivers for my graphics card. After installing them, I commissioned Claude to produce a final optimal solution report.  
 
-    After this step, a functioning pipeline complies and builds. 
+    Since optimization is optional, I didn't modify the code in the main branch to the optimized version, but rather kept it on a separate branch `dev_c2_opt`. But I included the three reports in the main branch: [v0](./report/PERFORMANCE_OPTIMIZATION_REPORT.md), [v1](./report/PERFORMANCE_OPTIMIZATION_REPORT_V2.md), and [final](./report/FINAL_GPU_PERFORMANCE_REPORT.md).
 
-5. Implemented another solution just using Claude Code CLI and compared the results against it for improvement
-    To get the best solution available, before any code was impelmented, I created antoher repo where I asked Claude CLI to implement the whole solution from scratch, for comparison. The out of box code didn't differ meaningfully from my solution above. So not much was gained from this step. 
+---
 
+### Appendix  
+> 1. "Color images are often converted to grayscale before applying edge detection techniques like Canny, Sobel, or Laplacian. This simplifies the process by reducing the image to a single intensity channel, making it easier to detect edges based on intensity changes."  
 
-6. Performance improvement
-    Though it's not needed to do performance improvement. I still did 3 iterations with Claude Code CLI just for fun, on a seperate repo from scratch. The procedure is:  
-    - Ask Claude to identify the potential performance issues.
-    - Ask Claude to implement runtime profilling under debug flag in the C++ and Python file. 
-    - Looked up a performance optimization [tutorial](https://www.opencvhelp.org/tutorials/best-practices/performance-optimization/) for openCV.
-    - Ask Claude to integrate the advice from the OpenCV and implement the performance optimization it proposed and generate a report. 
-    - The report says the optimization using `cv::UMat`didn't improve much, due to maybe data copying between CPU and GPU, also **because I forgot to instal Nvidia drives for my newly setup graphic cards.**
-    - After graphic card is intalled, commmisoned Claude to do a final report to describe the optimal solution
+> 2. "After processing with Sobel detector, since the result is in floating-point format, it’s converted to an 8-bit unsigned format using `convertScaleAbs()` so it can be displayed or saved properly."  
 
-    I included the three iterative reports generated by Claude in the report folder of this repo, [v0](./report/PERFORMANCE_OPTIMIZATION_REPORT.md), [V1](./report/PERFORMANCE_OPTIMIZATION_REPORT_V2.md) and [final](./report/FINAL_GPU_PERFORMANCE_REPORT.md).
-
-
-
-
-
-
-
-### Appendix 
-
-### take aways:
-> 1. "Color images are often converted to grayscale before applying edge detection techniques like Canny, Sobel, or Laplacian. This simplifies the process by reducing the image to a single intensity channel, making it easier to detect edges based on intensity changes"
-
-> 2. "Since the result is in floating-point format, it’s converted to an 8-bit unsigned format using convertScaleAbs() so it can be displayed or saved properly"
-
+> 3. The concept of hysteresis: If the gradient magnitude value is higher than the larger threshold, those pixels are solid edges and included in the final edge map. If lower than the smaller threshold, pixels are suppressed. Pixels in between are “weak” edges — included only if connected to strong edges.  
