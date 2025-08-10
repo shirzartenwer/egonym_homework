@@ -20,7 +20,6 @@ py::array_t<uint8_t> blur_largest_shape_in_rect(
     
     size_t height = buf_info.shape[0];
     size_t width = buf_info.shape[1];   
-    size_t channels = buf_info.shape[2];
     uint8_t* data_ptr = static_cast<uint8_t*>(buf_info.ptr);
     
     // Create OpenCV Mat from the buffer
