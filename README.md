@@ -89,7 +89,7 @@ Next, in the following text, I segmented the steps I’ve taken to understand th
 
     Using `cv::UMat` initially showed little benefit — likely due to CPU–GPU data copying and because I hadn’t installed Nvidia drivers for my graphics card. After installing them, I commissioned Claude to produce a final optimal solution report.  
 
-    Since optimization is optional, I didn't modify the code in the main branch to the optimized version, but rather kept it on a separate branch `dev_c2_opt`. But I included the three reports in the main branch: [v0](./report/PERFORMANCE_OPTIMIZATION_REPORT.md), [v1](./report/PERFORMANCE_OPTIMIZATION_REPORT_V2.md), and [final](./report/FINAL_GPU_PERFORMANCE_REPORT.md).
+    Since optimization is optional, I didn't modify the code in the main branch to the optimized version, but rather kept it on a separate branch `dev_c2_optl`. But I included the three reports in the main branch: [v0](./report/PERFORMANCE_OPTIMIZATION_REPORT.md), [v1](./report/PERFORMANCE_OPTIMIZATION_REPORT_V2.md), and [final](./report/FINAL_GPU_PERFORMANCE_REPORT.md).
 
 ---
 
