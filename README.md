@@ -57,9 +57,9 @@ Next, in the following text, I segmented the steps I’ve taken to understand th
 4. **Pulling sample data, testing pipeline, and parameter tuning**  
     At this point, I needed to pull some sample data for testing the pipeline. Given Egonym works with facial data, I pulled a portrait from the internet — the “smiling lady” image. This portrait later helped with parameter tuning.  
 
-    Inspecting the result for the first [sample data](./input_images_test/1/smiling_lady.jpg), I saw it blurred too much area. The issue was an ill-generated mask. **It turns out tuning the mask was not as easy as it appears** — the detected edges through Canny directly influence how the mask will look. Clearer pictures make edge detection easier. For the sample data, the edges looked like [this](./report/smiling_lady_edges.jpg) and the mask had only one contour [(seen here)](./report/smiling_lady_mask.jpg).  
+    Inspecting the result for the first [sample data](./Test/input_images_test/1/smiling_lady.jpg), I saw it blurred too much area. The issue was an ill-generated mask. **It turns out tuning the mask was not as easy as it appears** — the detected edges through Canny directly influence how the mask will look. Clearer pictures make edge detection easier. For the sample data, the edges looked like [this](./report/smiling_lady_edges.jpg) and the mask had only one contour [(seen here)](./report/smiling_lady_mask.jpg).  
 
-    When I switched to a [standard LinkedIn portrait](./input_images_test/2/better_protrait_rect160_1_200_240.jpg), the edge picture was [this one](./output_images_test/report/better_protrait_rect160_1_200_240_edges.jpg) and the mask was [much better](./output_images_test/report/better_protrait_rect160_1_200_240_mask.jpg) — just missing one closing line.  
+    When I switched to a [standard LinkedIn portrait](./Test/input_images_test/2/better_protrait_rect160_1_200_240.jpg), the edge picture was [this one](./report/better_protrait_rect160_1_200_240_edges.jpg) and the mask was [much better](./report/better_protrait_rect160_1_200_240_mask.jpg) — just missing one closing line.  
 
     I then tuned:  
     - The hysteresis thresholds of the Canny function.  
@@ -71,9 +71,9 @@ Next, in the following text, I segmented the steps I’ve taken to understand th
     ```c++
     cv::morphologyEx(edges, edges, cv::MORPH_CLOSE, ...);
     ```
-    This connected contours and produced [good edges](./output_images_test/better_protrait_edges.jpg), [a mask matching the head](./output_images_test/better_protrait_mask.jpg), and [a good blur](./output_images_test/better_protrait_rect160_1_200_240.jpg).  
+    This connected contours and produced [good edges](./Test/output_images_test/better_protrait_edges.jpg), [a mask matching the head](./Test/output_images_test/better_protrait_rect160_1_200_240_mask.jpg), and [a good blur](./Test/output_images_test/better_protrait_rect160_1_200_240.jpg).  
 
-    I repeated tuning on other images, learning parameter effects — e.g., for the [5th picture](./input_images_test/5/mens_gromming_rect100_1_400_300.jpg), where face–clothing contrast is high, using very high thresholds gave the best result [as seen here](./output_images_test/mens_gromming_mask.jpg).  
+    I repeated tuning on other images, learning parameter effects — e.g., for the [5th picture](./Test/input_images_test/5/mens_gromming_rect100_1_400_300.jpg), where face–clothing contrast is high, using very high thresholds like 180 for lower bound and 500 as an upper bound, gave the best result [as seen here](./Test/output_images_test/mens_gromming_rect100_1_400_300.jpg).  
 
     After this step, the pipeline compiled and built successfully.
 
