@@ -15,8 +15,7 @@ Next, in the follwing text I segmented few steps I've taken to understand the pr
 ## Steps
 
 1. Problem understanding: learning from function Signature and ChatGPT
-    This step involved understanding the abstract problem of : Given a rectangle area on a picture, detect the biggest shape and bluring it. I used ChatGPT to understand the common approach of solving it.  After a few iterations with ChatGPT, the solution workflow visualiszed as a diagram by ChatGPT looked like this.
-    ![alt text](image.png)
+    This step involved understanding the abstract problem of : Given a rectangle area on a picture, detect the biggest shape and bluring it. I used ChatGPT to understand the common approach of solving it.  After a few iterations with ChatGPT, the solution workflow visualiszed as a diagram by ChatGPT looked like [this](image.png)
 
     From this diagram, I understood a few key concetps: converting to gray scale, converting to black and white using thresholding, and a need for a mask. 
 
@@ -66,7 +65,7 @@ Next, in the follwing text I segmented few steps I've taken to understand the pr
     
     <img src='./input_images_test/1/smiling_lady.jpg', alt="Smiling Lady", width="10"/>
 
-    it blurred to match area. After digging it deeper, the problem was the ill-generated mask. Turns out tuning the mask was not as easy as it apepars. The detected edges through Canny directly influence how the Mask will look like. Getting a clearer picture as training data makes the edge detectoin easier. Considering this, I changed my training data from [A smiling laday with scarf](./input_images_test/1/smiling_lady.jpg) to a [standard linkedin protrait picture](./input_images_test/2/better_protrait_rect160_1_200_240.jpg). The edges and masks for the lady was returned as [](./output_images_test/report/smiling_lady_edges.jpg) and the mask was only one contour [](./output_images_test/report/smiling_lady_mask.jpg). 
+    it blurred to match area. After digging it deeper, the problem was the ill-generated mask. Turns out tuning the mask was not as easy as it apepars. The detected edges through Canny directly influence how the Mask will look like. Getting a clearer picture as training data makes the edge detectoin easier. Considering this, I changed my training data from [A smiling laday with scarf](./input_images_test/1/smiling_lady.jpg) to a [standard linkedin protrait picture](./input_images_test/2/better_protrait_rect160_1_200_240.jpg). The edges and masks for the lady was returned as [this](./report/smiling_lady_edges.jpg) and the mask was only one contour [(seen here)](./report/smiling_lady_mask.jpg). 
 
     In contrast, for the same parameter, without changing anything, the [edge picture for the standard linkedin protrait was ](./output_images_test/report/better_protrait_rect160_1_200_240_edges.jpg) and [the mask was ](./output_images_test/report/better_protrait_rect160_1_200_240_mask.jpg). At least, this time the mask was a contour that just missed one closing line.
 
@@ -74,12 +73,12 @@ Next, in the follwing text I segmented few steps I've taken to understand the pr
     - The hysteries threshould of the Canny function.
     - The blur kernnel in the first Gaussina Blur function.
 
-    Tunining them lead to a little bit better results: [a more detailed edges](./output_images_test/report/tunning/better_protrait_rect160_1_200_240_edges.jpg) and at least [a closing mask](./output_images_test/report/tunning/better_protrait_rect160_1_200_240_mask.jpg).
+    Tunining them lead to a little bit better results: [a more detailed edges](./report/tunning/better_protrait_rect160_1_200_240_edges.jpg) and at least [a closing mask](./report/tunning/better_protrait_rect160_1_200_240_mask.jpg).
 
     From here, I then asked AI on how to improve it better. Go suggestions to apply dilataion, or erosion. In the end, after some trial and error, I got the best mask result so far using ```cv::morphologyEx(edges, edges, cv::MORPH_CLOSE...);``` to connect contours and. The end result I got was then [a good edge](./output_images_test/better_protrait_edges.jpg), [a mask with the shape of the head](./output_images_test/better_protrait_mask.jpg), which lead to a [good blur](./output_images_test/better_protrait_rect160_1_200_240.jpg).
 
 
-    After I got this result with this protrait, I went on and tunned the parameters a little bit and blured other 3 pictures. During this process, I gained more intuitive understanding of different parameters. For example, for the [5 th picture](./input_images_test/5/mens_gromming_rect100_1_400_300.jpg) where the the contrast between the face and cloth color is huge, having a very big paramter for the lower and upperbound of hysteresis threshold gives the best result [](./output_images_test/mens_gromming_mask.jpg). Also in this case, controlloing the lower threshold to 180 would be sufficient and upper threshold can be any number bigger than 180.
+    After I got this result with this protrait, I went on and tunned the parameters a little bit and blured other 3 pictures. During this process, I gained more intuitive understanding of different parameters. For example, for the [5 th picture](./input_images_test/5/mens_gromming_rect100_1_400_300.jpg) where the the contrast between the face and cloth color is huge, having a very big paramter for the lower and upperbound of hysteresis threshold gives the best result [as its seen here](./output_images_test/mens_gromming_mask.jpg). Also in this case, controlloing the lower threshold to 180 would be sufficient and upper threshold can be any number bigger than 180.
 
     After this step, a functioning pipeline complies and builds. 
 
@@ -96,7 +95,7 @@ Next, in the follwing text I segmented few steps I've taken to understand the pr
     - The report says the optimization using `cv::UMat`didn't improve much, due to maybe data copying between CPU and GPU, also **because I forgot to instal Nvidia drives for my newly setup graphic cards.**
     - After graphic card is intalled, commmisoned Claude to do a final report to describe the optimal solution
 
-    I included the three iterative reports generated by Claude in the report folder of this repo. 
+    I included the three iterative reports generated by Claude in the report folder of this repo, [v0](./report/PERFORMANCE_OPTIMIZATION_REPORT.md), [V1](./report/PERFORMANCE_OPTIMIZATION_REPORT_V2.md) and [final](./report/FINAL_GPU_PERFORMANCE_REPORT.md).
 
 
 
