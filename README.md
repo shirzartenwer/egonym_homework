@@ -10,6 +10,8 @@ Next, in the following text, I segmented the steps I’ve taken to understand th
 2. The `dev` branch contains the debug flag. It builds by default with the debug flag.
 3. The `dev_c2_optl` branch contains the optimization work done with Claude. It was done in a separate repo but pushed here for completeness and transparency.
 
+The code here could be run using, for example `python setup.py build_ext --inplace && python run_pipeline.py --input ./input_images_test/5/ --output ./output_images_test/ --rect 100 1 400 300 --blur_kernel 51`.
+
 ## Steps
 
 1. **Problem understanding**: Learning from function signatures and ChatGPT  
