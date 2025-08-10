@@ -14,7 +14,7 @@ Next, in the following text, I segmented the steps I’ve taken to understand th
 
 1. **Problem understanding**: Learning from function signatures and ChatGPT  
 
-    This step involved understanding the abstract problem: *Given a rectangular area in a picture, detect the biggest shape and blur it*. I used ChatGPT to understand the common approach to solving it. After a few iterations with ChatGPT, the solution workflow visualized as a diagram by ChatGPT looked like [this](image.png).  
+    This step involved understanding the abstract problem: *Given a rectangular area in a picture, detect the biggest shape and blur it*. I used ChatGPT to understand the common approach to solving it. After a few iterations with ChatGPT, the solution workflow visualized as a diagram by ChatGPT looked like [this](./report/image.png).  
 
     From this diagram, I understood a few key concepts: converting to grayscale, converting to black and white using thresholding, and the need for a mask.  
 
