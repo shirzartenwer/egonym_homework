@@ -6,9 +6,9 @@ Next, in the following text, I segmented the steps I’ve taken to understand th
 
 ## Setups
 
-1. The main branch contains the final solution, images used for the reporting, and final code.
-2. The dev branch contains the debug flag. It builds by default with the debug flag.
-3. The dev_c2_optl branch contains the optimization work done with Claude. It was done in a separate repo but pushed here for completeness and transparency.
+1. The `main` branch contains the final solution, images used for the reporting, and final code.
+2. The `dev` branch contains the debug flag. It builds by default with the debug flag.
+3. The `dev_c2_optl` branch contains the optimization work done with Claude. It was done in a separate repo but pushed here for completeness and transparency.
 
 ## Steps
 
